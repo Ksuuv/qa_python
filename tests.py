@@ -48,29 +48,46 @@ class TestBooksCollector:
         all_books = collector.get_books_genre()
         assert all_books is not None, "Ошибка получения словаря книг"
 
-    def test_get_books_for_children_children_books_separately(self):
+    @pytest.mark.parametrize('book_name, genre, is_children', [
+        ('Мультик', 'Мультфильмы', True),
+        ('Страшилка', 'Ужасы', False)
+    ])
+    def test_get_books_for_children_children_books_separately(self, book_name, genre, is_children):
 
         collector = BooksCollector()
-
-        collector.add_new_book('Мультик')
-        collector.set_book_genre('Мультик', 'Мультфильмы')
+        
+        collector.add_new_book(book_name)
+        collector.set_book_genre(book_name, genre)
         children_books = collector.get_books_for_children()
-        assert 'Мультик' in children_books, "Ошибка получения детских книг"
+        
+        if is_children:
+            assert book_name in children_books, "Детские книги не попали в children_books"
+        else:
+            assert book_name not in children_books, "Не детские книги попали в children_books"
 
     @pytest.mark.parametrize('book_name', [
         'Война и мир',
         'Мультик',
         'Искусство автотестов'
     ])
-    def test_add_and_delete_from_favorites_books_add_and_delete_from_favorites(self, book_name):
+    def test_add_book_in_favorites_books_added(self, book_name):
 
         collector = BooksCollector()
 
         collector.add_new_book(book_name)
-
         collector.add_book_in_favorites(book_name)
         assert book_name in collector.favorites, "Ошибка добавления книги в избранное"
-        
+
+    @pytest.mark.parametrize('book_name', [
+        'Война и мир',
+        'Мультик',
+        'Искусство автотестов'
+    ])
+    def test_delete_book_from_favorites_books_deleted(self, book_name):
+
+        collector = BooksCollector()
+
+        collector.add_new_book(book_name)
         collector.delete_book_from_favorites(book_name)
         assert book_name not in collector.favorites, "Ошибка удаления книги из избранного"
 
